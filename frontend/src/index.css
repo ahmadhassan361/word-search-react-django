@@ -1,0 +1,100 @@
+:root{
+
+  --main-background : #FAFFE4;
+  --main-green: #008080;
+}
+
+body {
+  background-color: var(--main-background);
+  margin: 0;
+  
+}
+.nav-btn{
+  background-color: transparent;
+  cursor: pointer;
+}
+.nav-btn:hover{
+  background-color: #444444;
+  color: #fff;
+}
+.main-btn{
+  background-color: transparent;
+  cursor: pointer;
+}
+.main-btn:hover{
+  background-color: #8a8a8a;
+  color: #fff;
+}
+.bg-main{
+  background-color: var(--main-green);
+}
+
+.main-heading{
+  font-size: 50px;
+  color: var(--main-green);
+}
+.nav-menu-btn{
+  display: none;
+}
+.nav-line-btn{
+  display: flex;
+}
+.text-main{
+  color: #444444;
+}
+@media (max-width: 500px) {
+  .main-heading{
+    font-size: 30px;
+  }
+}
+@media (max-width: 1000px) {
+  .nav-line-btn{
+    display: none;
+  }
+  .nav-menu-btn{
+    display: block;
+  }
+}
+textarea:focus, input:focus{
+  outline: none;
+}
+.category-tile{
+  background-color: #008080;
+  cursor: pointer;
+
+}
+.category-tile:hover{
+  background-color: #03a1a1;
+}
+
+/* .cell{
+  padding: 0px 2px;
+  font-size: 8px;
+  font-weight: bold;
+
+} */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table, th, td {
+  border: 1px solid black;
+}
+
+th, td {
+  padding-top: 15px;
+  padding-bottom: 15px;
+  text-align: center;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+@media (max-width: 600px) {
+  table, th, td {
+    font-size: 10px;
+    padding: 5px;
+  }
+}
