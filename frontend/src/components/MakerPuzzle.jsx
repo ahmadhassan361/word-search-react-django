@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import APIClient from '../service/APIClient'
 import { MAIN_BASE_URL } from '../service/contants'
 
@@ -13,6 +13,7 @@ export const MakerPuzzle = ({ id }) => {
     const [wordsMatrix, setWordsMatrix] = useState(null)
     const [wordLoc, setWordLoc] = useState([])
     const [mainWordLoc, setMainWordLoc] = useState([])
+    const navigate = useNavigate()
     useEffect(() => {
         const { protocol, hostname, port } = window.location;
         const url = `${protocol}//${hostname}${port ? `:${port}` : ''}/`;
@@ -25,7 +26,7 @@ export const MakerPuzzle = ({ id }) => {
         setGame(res)
         setLoading(false)
         console.log(res)
-        const wordsLists = JSON.parse(JSON.parse(res?.words_list.replace(/'/g, "\"").toUpperCase()));
+        const wordsLists = res?.words_list.replace(/'/g, "\"").toUpperCase().split(',');
 
         console.log(typeof (wordsLists))
         setwordList(wordsLists)
@@ -111,10 +112,10 @@ export const MakerPuzzle = ({ id }) => {
                         <p style={{ fontSize: '13px' }}>⚠️ Keep the secret edit link somewhere safe and don't share it. You need it if you want to make changes to this puzzle.</p>
 
                         <div className="d-flex mt-5">
-                            <button className='btn btn-warning rounded-0 fw-bold fs-5' style={{ borderLeft: '6px solid #000' }}>edit</button>
-                            <button className='btn btn-warning rounded-0 fw-bold fs-5' style={{ borderLeft: '6px solid #000' }}>play</button>
-                            <button className='btn btn-warning rounded-0 fw-bold fs-5' style={{ borderLeft: '6px solid #000' }}>delete</button>
-                            <button className='btn btn-warning rounded-0 fw-bold fs-5' style={{ borderLeft: '6px solid #000' }}>download</button>
+                            <button className='btn btn-warning rounded-0 fw-bold fs-5' style={{ borderLeft: '6px solid #000' }} onClick={()=>navigate(`/maker-edit/${game?.game_id}/${game?.key}`)}>edit</button>
+                            <button className='btn btn-warning rounded-0 fw-bold fs-5' style={{ borderLeft: '6px solid #000' }} onClick={()=>navigate(`/puzzle/${game?.game_id}/`)}>play</button>
+                            <button className='btn btn-warning rounded-0 fw-bold fs-5' style={{ borderLeft: '6px solid #000' }} onClick={()=>navigate('/')}>delete</button>
+                            <button className='btn btn-warning rounded-0 fw-bold fs-5' style={{ borderLeft: '6px solid #000' }} onClick={()=>navigate(`/puzzle/${game?.game_id}/download`)}>download</button>
                         </div>
                         <div className="row mt-1 g-0">
                             <div className="col-md-8 bg-white border border-dark border-3 p-3 col-12">
@@ -251,53 +252,65 @@ function convertWordsToMatrix(wordlist) {
 
 
     function placeWord(word) {
-        for (let attempt = 0; attempt < 10; attempt++) {
-            const orientation = Math.floor(Math.random() * 4); // 0 for horizontal, 1 for vertical, 2 for diagonal top-left to bottom-right, 3 for diagonal top-right to bottom-left
-            const startX = Math.floor(Math.random() * 14);
-            const startY = Math.floor(Math.random() * 14);
-
-            let isValid = true;
-            const wordCoords = [];
-
-            for (let i = 0; i < word.length; i++) {
-                let currentX = startX;
-                let currentY = startY;
-
-                if (orientation === 0) {
-                    currentX += i;
-                } else if (orientation === 1) {
-                    currentY += i;
-                } else if (orientation === 2) {
-                    currentX += i;
-                    currentY += i;
-                } else if (orientation === 3) {
-                    currentX -= i;
-                    currentY += i;
+        for (let y = 0; y < 14; y++) {
+            for (let x = 0; x < 14; x++) {
+                const orientations = [0, 1, 2, 3];
+                // Shuffle orientations array to randomize placement attempts
+                for (let i = orientations.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [orientations[i], orientations[j]] = [orientations[j], orientations[i]];
                 }
-
-                if (
-                    currentX >= 14 ||
-                    currentY >= 14 ||
-                    currentX < 0 ||
-                    currentY < 0 ||
-                    (matrix[currentY][currentX] !== null && matrix[currentY][currentX] !== word[i])
-                ) {
-                    isValid = false;
-                    break;
+    
+                for (const orientation of orientations) {
+                    const wordCoords = [];
+                    let isValid = true;
+    
+                    for (let i = 0; i < word.length; i++) {
+                        let currentX = x;
+                        let currentY = y;
+    
+                        if (orientation === 0) {
+                            currentX += i;
+                        } else if (orientation === 1) {
+                            currentY += i;
+                        } else if (orientation === 2) {
+                            currentX += i;
+                            currentY += i;
+                        } else if (orientation === 3) {
+                            currentX -= i;
+                            currentY += i;
+                        }
+    
+                        if (
+                            currentX >= 14 ||
+                            currentY >= 14 ||
+                            currentX < 0 ||
+                            currentY < 0 ||
+                            (matrix[currentY][currentX] !== null && matrix[currentY][currentX] !== word[i])
+                        ) {
+                            isValid = false;
+                            break;
+                        }
+    
+                        wordCoords.push([currentY, currentX]);
+                    }
+    
+                    if (isValid) {
+                        const color = getRandomColor();
+                        wordLocations.push({ word, indexes: wordCoords, color });
+    
+                        for (let i = 0; i < word.length; i++) {
+                            const [y, x] = wordCoords[i];
+                            matrix[y][x] = word[i];
+                        }
+    
+                        return true;
+                    }
                 }
-
-                matrix[currentY][currentX] = word[i];
-                wordCoords.push([currentY, currentX]);
-            }
-
-            if (isValid) {
-                const color = getRandomColor()
-                wordLocations.push({ word, indexes: wordCoords, color });
-                return true;
             }
         }
-
-        return false; // Could not place the word after multiple attempts
+    
+        return false; // Could not place the word
     }
 
     for (const word of wordlist) {

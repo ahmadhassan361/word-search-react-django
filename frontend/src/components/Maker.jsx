@@ -35,7 +35,7 @@ export const Maker = () => {
         setInputs(newInputs);
         setErrors(newErrors);
     };
-
+const [submitLoading, setSubmitLoading] = useState(false)
 
 
 
@@ -70,13 +70,14 @@ export const Maker = () => {
             setRadioError(true)
             return
         }
-
+        console.log(JSON.stringify(filledInputs))
         const valData = {
-            'words_list': JSON.stringify(filledInputs),
+            'words_list': filledInputs.join(','),
             'title': title,
             'description': description
         }
         {
+            setSubmitLoading(true)
             const res = await APIClient.createGame(
                 valData
                 )
@@ -88,6 +89,7 @@ export const Maker = () => {
                 setTimeout(() => {
                     
                     setshow(true)
+                    setSubmitLoading(false)
                 }, 2000);
             // }
         }
@@ -190,7 +192,19 @@ export const Maker = () => {
                     <p className='col-12 bg-danger text-white p-1 '>Please select a subject</p>
                     : <></>
             }
-            <button style={{ backgroundColor: '#FFC107' }} className='w-100 p-3 border-0 btn fs-4 fw-bold mt-3 rounded-0' onClick={handleSubmit}>Submit</button>
+            {
+                submitLoading?
+
+                <button style={{ backgroundColor: '#FFC107' }} className='w-100 p-3 border-0 btn fs-4 fw-bold mt-3 rounded-0' >
+                    <div className='w-100 d-flex justify-content-center '>
+
+                    <div className="spinner-border text-white" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                    </div>
+                </button>
+                :<button style={{ backgroundColor: '#FFC107' }} className='w-100 p-3 border-0 btn fs-4 fw-bold mt-3 rounded-0' onClick={handleSubmit}>Submit</button>
+            }
 
 
             <div className='bg-main py-4 px-3' style={{ marginTop: '100px' }}>

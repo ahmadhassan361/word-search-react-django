@@ -1,7 +1,7 @@
 :root{
 
-  --main-background : #FAFFE4;
-  --main-green: #008080;
+  --main-background : #34deeb;
+  --main-green: #974B40;
 }
 
 body {
@@ -97,4 +97,9 @@ th {
     font-size: 10px;
     padding: 5px;
   }
+}
+.unity-build{
+width: "850px";
+ height: "600px";
+
 }

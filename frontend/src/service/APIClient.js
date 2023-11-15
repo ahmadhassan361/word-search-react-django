@@ -20,16 +20,11 @@ class APIClient {
       const data = await response.json();
       return data;
     }
-  
-    static async getGamesByCategory(categoryTitle) {
-      const response = await fetch(`${this.BASE_URL}/games-by-category/${categoryTitle}/`);
-      const data = await response.json();
-      return data;
-    }
-  
-    static async updateGame(key, game_id, gameData) {
-      const response = await fetch(`${this.BASE_URL}/games/${key}/${game_id}/`, {
-        method: 'PATCH',
+    static async updateGame(gameData,key,id) {
+      console.log("aiwdhaiwdhiawu")
+      console.log(`${this.BASE_URL}/games/${key}/${id}/`)
+      const response = await fetch(`${this.BASE_URL}/games/${key}/${id}/`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -38,6 +33,24 @@ class APIClient {
       const data = await response.json();
       return data;
     }
+  
+    static async getGamesByCategory(categoryTitle) {
+      const response = await fetch(`${this.BASE_URL}/games-by-category/${categoryTitle}/`);
+      const data = await response.json();
+      return data;
+    }
+  
+    // static async updateGame(key, game_id, gameData) {
+    //   const response = await fetch(`${this.BASE_URL}/games/${key}/${game_id}/`, {
+    //     method: 'PATCH',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify(gameData),
+    //   });
+    //   const data = await response.json();
+    //   return data;
+    // }
   
     static async getGameByGameId(game_id) {
       const response = await fetch(`${this.BASE_URL}/games-get/${game_id}/`);

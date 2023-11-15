@@ -26,6 +26,7 @@ urlpatterns = [
     re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
     path('admin/', admin.site.urls),
     path('api/v1/categories/', CategoryGamesListView.as_view(), name='category-list'),
+    path('api/v1/sitemap/', CategoryGetGamesListView.as_view(), name='sitemap-list'),
     path('api/v1/games/', GameCreateView.as_view(), name='game-create'),
     path('api/v1/games-by-category/<str:category_title>/', GameListView.as_view(), name='game-list'),
     path('api/v1/games/<str:key>/<str:game_id>/', GameUpdateView.as_view(), name='game-update'),

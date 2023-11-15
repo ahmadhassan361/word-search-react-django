@@ -16,11 +16,12 @@ class GameSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         words_list = validated_data.pop('words_list', [])
         game = Game.objects.create(**validated_data)
-        game.words_list = json.dumps(words_list)
+        game.words_list = words_list
         game.game_id = uuid.uuid4()
         game.key = uuid.uuid4()
         game.save()
         return game
+    
     def to_representation(self, instance):
 
         representation = super().to_representation(instance)
@@ -40,5 +41,17 @@ class CategorySerializer(serializers.ModelSerializer):
     def get_games(self, obj):
         request = self.context.get('request')
         games = obj.game_set.all()[:6]
+        return GameSerializer(games, many=True, context={'request': request}).data
+class CategoryGetSerializer(serializers.ModelSerializer):
+    games = serializers.SerializerMethodField()
+    total_games = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = Category
+        fields = ['id', 'title', 'image', 'description', 'games','total_games']
+
+    def get_games(self, obj):
+        request = self.context.get('request')
+        games = obj.game_set.all()
         return GameSerializer(games, many=True, context={'request': request}).data
 

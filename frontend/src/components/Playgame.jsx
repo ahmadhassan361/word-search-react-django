@@ -1,38 +1,77 @@
 import React, { useEffect, useState, Fragment, useCallback } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import APIClient from '../service/APIClient'
 import { Unity, useUnityContext } from "react-unity-webgl";
+import { useRef } from 'react';
 
 export const Playgame = () => {
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+    // useEffect(() => {
+    //   const handleResize = () => {
+    //     setIsMobile(window.innerWidth <= 768); // Adjust the threshold as needed
+    //   };
+  
+    //   // Initial check on component mount
+    //   handleResize();
+  
+    //   // Listen for resize events
+    //   window.addEventListener('resize', handleResize);
+  
+    //   // Clean up event listener on component unmount
+    //   return () => {
+    //     window.removeEventListener('resize', handleResize);
+    //   };
+    // }, []);
+  
+  
+    useEffect(() => {
+      console.log(isMobile)
+    }, [isMobile])
+    const navigate = useNavigate()
     const { id } = useParams()
     const [loading, setLoading] = useState(true)
     const [game, setGame] = useState(null)
     const [wordList, setwordList] = useState([])
-    
+
+  
     const fetchGame = async () => {
         const res = await APIClient.getGameByGameId(id)
         setGame(res)
         setLoading(false)
         console.log(res)
-        const wordsLists = JSON.parse(res?.words_list.replace(/'/g, "\""));
-        setwordList(JSON.parse(wordsLists))
+        const wordsLists = res?.words_list.replace(/'/g, "\"").split(',');
+        setwordList(wordsLists)
     }
     
     const { unityProvider, sendMessage, addEventListener, removeEventListener } =
+        // useUnityContext({
+        //     loaderUrl: LOADER,
+        //     dataUrl: BUILD_DATA,
+        //     frameworkUrl: FRAMEWORK,
+        //     codeUrl: WASM,
+        // });
         useUnityContext({
-            loaderUrl: "/build/word-puzzle.loader.js",
-            dataUrl: "/build/webgl.data",
-            frameworkUrl: "/build/build.framework.js",
-            codeUrl: "/build/build.wasm",
+            loaderUrl: "/static/media/build/build.loader.js",
+            dataUrl: "/static/media/build/build.data.unityweb",
+            frameworkUrl: "/static/media/build/build.framework.js.unityweb",
+            codeUrl: "/static/media/build/build.wasm.unityweb",
         });
         const getparam = () => {
+
             // Define the behavior of getparam here
             console.log("calling get Param")
+            console.log("wordlist print by muneeb**", wordList)
+            const { protocol, hostname, port } = window.location;
+        const url = `${protocol}//${hostname}${port ? `:${port}` : ''}/`;
             sendMessage("GameData","SetData",JSON.stringify({
                 columns: 14,
                 rows: 12,
                 words: wordList,
-                homeUrl: "https://google.com"
+                homeUrl: url,
+                isMobileVersion: isMobile,
+                width: window.innerWidth,
+                height: window.innerHeight
             }))
           }
           
@@ -53,6 +92,8 @@ export const Playgame = () => {
         fetchGame()
 
     }, [id])
+    const divRef = useRef(null);
+
     const [devicePixelRatio, setDevicePixelRatio] = useState(
         window.devicePixelRatio
       );
@@ -79,15 +120,19 @@ export const Playgame = () => {
         [devicePixelRatio]
       );
     return (
-        <div className='my-5'>
-            <h1 style={{ fontSize: '32px' }} className='m-0'>{game?.title}</h1>
+        <div className='my-5' ref={divRef}>
+            <h1 style={{ fontSize: '42px' }} className='my-3'>{game?.title}</h1>
             {/* <div className="row">
                 <div className="col-md-7 col-12" > */}
 
-                    <div className='bg-secondary text-center text-white' style={{ height: 'auto' }}>
+                    <div className=' text-start text-white'  style={{ height: 'auto' }}>
                         <Fragment>
+                            {/* <Unity unityProvider={unityProvider}
+                            style={{ width: isMobile? window.innerWidth:"850px", height: "600px" }}
+                            devicePixelRatio={devicePixelRatio}
+                            />                             */}
                             <Unity unityProvider={unityProvider}
-                            // style={{ width: "400px", height: "400px" }}
+                            style={{ width: isMobile? divRef?.current?.offsetWidth:"850px", height: "600px" }}
                             devicePixelRatio={devicePixelRatio}
                             />                            
                         </Fragment>
@@ -95,10 +140,11 @@ export const Playgame = () => {
                 {/* </div>
                 <div className="col-md-5"></div>
             </div> */}
+            
+            <button className='btn btn-warning rounded-0 fw-bold fs-5 px-5' onClick={()=>navigate(`/puzzle/${game?.game_id}/download`)} style={{ borderLeft: '6px solid #000' }}>download</button>
 
-
-
-
+            <h1 style={{ fontSize: '30px' }} className='mt-5 text-decoration-underline'>Description</h1>
+            <h6>{game?.description}</h6>
         </div>
     )
 }
